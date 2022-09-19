@@ -13,7 +13,7 @@ sock = socket.socket(socket.AF_INET, type=socket.SOCK_DGRAM)
 sock.bind(('127.0.0.1', 1235))
 # ----------------------------------------------------------
 
-monitor_number = 1
+monitor_number = 0
 with mss.mss() as sct:
     monitor = sct.monitors[monitor_number]
     monitor['mon'] = monitor_number
@@ -34,7 +34,7 @@ while True:
         # スクリーンショットを取得
         frame = cv2.cvtColor(np.array(grab_image(monitor), np.uint8), cv2.COLOR_BGR2RGB)
 
-        cv2.circle(frame, (float(row[1]) * frame.shape[1]), int(float(row[2]) * frame.shape[0])), 10, (0, 255, 0), thickness=5)
+        cv2.circle(frame, (int(float(row[1]) * frame.shape[1]), int(float(row[2]) * frame.shape[0])), 10, (0, 255, 0))
         cv2.imshow('Gaze Visualization', frame)
         if (cv2.waitKey(1) & 0xFF) == ord('q'):
             break
