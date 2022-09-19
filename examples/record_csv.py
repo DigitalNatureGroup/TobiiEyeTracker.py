@@ -1,4 +1,5 @@
 import socket
+import csv
 from datetime import datetime
 
 # ---------- ここは変更しないようにしてください！ ----------
@@ -9,20 +10,25 @@ sock.bind(('127.0.0.1', 1235))
 # ----------------------------------------------------------
 
 # CSVの行を追加していく配列
-csv_rows = [['timestamp [ms]', 'x', 'y']]
+csv_rows = [['timestamp [micros]', 'x', 'y']]
+
+print('Waiting message')
 
 while True:
     try :
-        print('Waiting message')
         # クライアントからメッセージが届くまで待機
         message, client_addr = sock.recvfrom(1024)
 
         # メッセージが届いたら文字列形式にデコード・カンマ区切りで分解
         row = message.decode(encoding='utf-8').split(',')
-        print(row[0], ':', '(', row[1], ',', row[2], ')')
+        # 行の形式が違う場合は飛ばす
+        if len(row) != 3:
+            continue
+
+        print(datetime.fromtimestamp(int(row[0]) / 1000000), ':', '(', row[1], ',', row[2], ')')
 
         # csv rowsに追加
-        csv_rows.append(row)
+        csv_rows.append(row[:3])
 
     # Ctrl+Cで実行を中止した時
     except KeyboardInterrupt:
@@ -30,7 +36,9 @@ while True:
         break
 
 # 現在時刻を記録
-now = datetime().strftime('%Y%M%d-%h%m%s')
+now = datetime.now().strftime('%Y%m%d-%H%M%S')
 # csvファイルの保存
-with open(now + '.csv', 'w') as f:
+with open(now + '.csv', 'w', newline='') as f:
     csv.writer(f).writerows(csv_rows)
+
+print('Wrote to:', now + '.csv')
